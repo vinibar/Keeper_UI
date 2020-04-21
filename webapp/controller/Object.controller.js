@@ -5,14 +5,16 @@ sap.ui.define([
 	"../model/formatter",
 	"sap/ui/model/BindingMode",
 	"sap/ui/core/Fragment",
-	"sap/m/MessageBox"
+	"sap/m/MessageBox",
+	"vinibar/Keeper_UI/model/Customer"
 ], function (BaseController,
 	JSONModel,
 	History,
 	formatter,
 	BindingMode,
 	Fragment,
-	MessageBox) {
+	MessageBox,
+	Customer) {
 	"use strict";
 
 	return BaseController.extend("vinibar.Keeper_UI.controller.Object", {
@@ -96,82 +98,21 @@ sap.ui.define([
 
 		onSaveNewEnvironment: function (oEvent) {
 
+			this.getView("objectView").setProperty("/busy", true);
+
 			var oNewEnvironment = this.getModel("newEnvironment").getData();
 			var oView = this.getView();
 			var sCustomerID = oView.getBindingContext().getObject().ID;
 
-			var oCustomer2EnvironmentType = {
-				customer_ID: sCustomerID,
-				environment_type_ID: oNewEnvironment.environment_type_ID
-			};
-
-			var sCustomerTypePath = this.getModel().createKey("/Customers2EnvironmentTypes", oCustomer2EnvironmentType);
-
-			// check if customer is already linked with the environment type
-			new Promise(function (resolve, reject) {
-				this.getModel().read(sCustomerTypePath, {
-					success: (oData) => {
-						resolve(oData);
-					},
-					error: (oError) => {
-						reject(oError);
-					}
-				});
-			}.bind(this))
-				// if it's not, do it
-				.catch(function (oError) {
-
-					return new Promise(function (resolve, reject) {
-						this.getModel().create("/Customers2EnvironmentTypes", oCustomer2EnvironmentType, {
-							success: (oData) => {
-								resolve(oData);
-							},
-
-							error: (oError) => {
-								reject(this)
-							}
-						})
-					}.bind(this));
-
-				}.bind(this))
-				// then create the Environment
-				.then(function (oData) {
-
-					var oView = this.getView();
-					var sCustomerID = oView.getBindingContext().getObject().ID;
-					var sEnvironmentTypeID = this.getModel("newEnvironment").getData().environment_type_ID;
-					var sTitle = this.getModel("newEnvironment").getData().title;
-
-					var oNewEnvironment = {
-						customer2environment_type_customer_ID: sCustomerID,
-						customer2environment_type_environment_type_ID: sEnvironmentTypeID,
-						title: sTitle
-					};
-
-					return new Promise(function (resolve, reject) {
-						this.getModel().create("/Environments", oNewEnvironment, {
-							success: (oData) => {
-								resolve(oData);
-							},
-							error: (oError) => {
-								reject(oError.message, {
-									icon: "sap-icon://error",
-									title: "Erro"	
-								});
-							}
-						});
-					}.bind(this));
-
-				}.bind(this))
-				// Finally, update the view
-				.catch(function (oError) {
-					debugger;
-					MessageBox.show(oError);
-				}.bind(this))
-				.then(function (oData) {
-					this.getModel().updateBindings();
-					this._oEnvironmentDialog.close();
-				}.bind(this));
+			var oCustomer = new Customer(sCustomerID, this.getModel());
+			oCustomer.createEnvironment({
+				environment_type_ID: oNewEnvironment.environment_type_ID,
+				title: oNewEnvironment.title
+			}).then(function () {
+				this.getModel().updateBindings();
+				this._oEnvironmentDialog.close();
+				this.getView("objectView").setProperty("/busy", false);
+			}.bind(this));
 
 		},
 
