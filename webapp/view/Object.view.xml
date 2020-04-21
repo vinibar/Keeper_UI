@@ -1,0 +1,79 @@
+<mvc:View height="100%" xmlns:mvc="sap.ui.core.mvc" xmlns:m="sap.m" xmlns="sap.uxap" xmlns:core="sap.ui.core" xmlns:grid="sap.ui.layout.cssgrid" xmlns:f="sap.f" xmlns:forms="sap.ui.layout.form" controllerName="vinibar.Keeper_UI.controller.Object" busy="{detailView>/busy}">
+
+	<ObjectPageLayout id="ObjectPageLayout" sections="{ path: 'environment_types', parameters: { expand: 'environment_type' }, templateShareable:false }">
+
+		<headerTitle>
+			<ObjectPageDynamicHeaderTitle>
+				<heading>
+					<m:HBox>
+						<m:Title text="{name}" />
+						<m:Link text="edit" />
+					</m:HBox>
+
+				</heading>
+
+				<expandedContent>
+					<m:Text text="algo aqui?" />
+				</expandedContent>
+
+				<actions>
+					<m:Button icon="sap-icon://add" text="Add Environment" type="Emphasized" tooltip="Add Environment" press=".onAddEnvironment" />
+					<m:Button text="Edit" type="Emphasized" />
+					<m:Button text="Cancel" />
+				</actions>
+			</ObjectPageDynamicHeaderTitle>
+		</headerTitle>
+
+		<sections>
+			<ObjectPageSection title="{environment_type/title}" subSections="{path: 'environments', templateShareable:true}">
+				<subSections>
+					<ObjectPageSubSection title="{title}">
+						<blocks>
+							<m:VBox>
+								<forms:SimpleForm editable="false" layout="ColumnLayout">
+									<core:Title text="Entradas" />
+									<m:Label labelFor="iAdditionalField1" text="Additional Field 1" />
+									<m:Input id="iAdditionalField1" value="Additional Field 1" editable="true" />
+									<m:Label labelFor="iAdditionalField2" text="Additional Field 2" />
+									<m:Input id="iAdditionalField2" value="Additional Field 2" editable="true" />
+									<m:Label labelFor="iAdditionalField3" text="Additional Field 3" />
+									<m:Input id="iAdditionalField3" value="Additional Field 3" editable="true" />
+									<m:Label labelFor="iAdditionalField4" text="Additional Field 4" />
+									<m:Input id="iAdditionalField4" value="Additional Field 4" editable="true" />
+									<m:Label labelFor="iAdditionalField5" text="Additional Field 5" />
+									<m:Input id="iAdditionalField5" value="Additional Field 5" editable="true" />
+								</forms:SimpleForm>
+								<m:Panel>
+									<m:headerToolbar>
+										<m:Toolbar height="3rem">
+											<m:Title text="Senhas" />
+											<m:ToolbarSpacer />
+											<m:Button icon="sap-icon://add" text="Add new" type="Transparent" />
+										</m:Toolbar>
+									</m:headerToolbar>
+									<m:content>
+										<f:GridList id="gridList" items="{path: 'auths', templateShareable: true}" growing="true" growingThreshold="4" delete=".onDeleteAuth" mode="Delete">
+											<f:GridListItem type="DetailAndActive" highlight="Success" press=".onAuthPress">
+												<m:VBox>
+													<m:VBox class="sapUiSmallMargin">
+														<m:Label labelFor="iAdditionalData" text="Additional Data" />
+														<m:Text id="iAdditionalData" text="100" />
+														<m:Label labelFor="iUser" text="Usuário" />
+														<m:Text id="iUser" text="{username}" />
+														<m:Label labelFor="iPassword" text="Senha" />
+														<m:Text id="iPassword" text="{password}" />
+													</m:VBox>
+												</m:VBox>
+											</f:GridListItem>
+										</f:GridList>
+									</m:content>
+								</m:Panel>
+							</m:VBox>
+						</blocks>
+					</ObjectPageSubSection>
+				</subSections>
+			</ObjectPageSection>
+		</sections>
+	</ObjectPageLayout>
+
+</mvc:View>
