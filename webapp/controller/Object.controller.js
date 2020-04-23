@@ -5,16 +5,18 @@ sap.ui.define([
 	"../model/formatter",
 	"sap/ui/model/BindingMode",
 	"sap/ui/core/Fragment",
-	"sap/m/MessageBox",
-	"vinibar/Keeper_UI/model/Customer"
+	"vinibar/Keeper_UI/model/Customer",
+	"sap/uxap/ObjectPageLayout",
+	"sap/m/MessageToast"
 ], function (BaseController,
 	JSONModel,
 	History,
 	formatter,
 	BindingMode,
 	Fragment,
-	MessageBox,
-	Customer) {
+	Customer,
+	ObjectPageLayout,
+	MessageToast) {
 	"use strict";
 
 	return BaseController.extend("vinibar.Keeper_UI.controller.Object", {
@@ -96,29 +98,109 @@ sap.ui.define([
 
 		},
 
+		onDeleteEnvironment: function (oEvent) {
+
+			this.getModel("objectView").setProperty("/busy", true);
+			this._oCurrentSubSection = oEvent.getSource().getParent();
+			this._oCurrentSection = this._oCurrentSubSection.getParent();
+			var oEnvironment = this._oCurrentSubSection.getBindingContext().getObject();
+
+			this._oCustomer.deleteEnvironment(oEnvironment)
+				.then(function (bDeleted) {
+					debugger;
+					this._oCurrentSection.removeSubSection(this._oCurrentSubSection.getId());
+					delete this._oCurrentSection;
+					delete this._oCurrentSubSection;
+					this.getModel("objectView").setProperty("/busy", false);
+					MessageToast.show("SubSection successfully deleted");
+				}.bind(this));
+
+		},
+
 		onSaveNewEnvironment: function (oEvent) {
 
-			this.getView("objectView").setProperty("/busy", true);
-
+			this.getModel("objectView").setProperty("/busy", true);
 			var oNewEnvironment = this.getModel("newEnvironment").getData();
 			var oView = this.getView();
 			var sCustomerID = oView.getBindingContext().getObject().ID;
 
-			var oCustomer = new Customer(sCustomerID, this.getModel());
-			oCustomer.createEnvironment({
+			this._oCustomer.createEnvironment({
 				environment_type_ID: oNewEnvironment.environment_type_ID,
 				title: oNewEnvironment.title
-			}).then(function () {
-				this.getModel().updateBindings();
+			}).then(function (oData) {
 				this._oEnvironmentDialog.close();
-				this.getView("objectView").setProperty("/busy", false);
-			}.bind(this));
+				setTimeout(function () { // need to wait for the scrollEnablement to be active
+					this._scrollToEnvironment(oData.ID);
+					this.getModel("objectView").setProperty("/busy", false);
+				}.bind(this), 500)
+
+			}.bind(this))
+		},
+
+		onSaveNewCredential: function (oEvent) {
+
+			this.getModel("objectView").setProperty("/busy", true);
+			var oNewCredential = this.getModel("newCredential").getData();
+			debugger;
+			this._oCustomer.createCredential(oNewCredential)
+				.then(function (oData) {
+					this._oCredentialDialog.close();
+					this.getModel("objectView").setProperty("/busy", false);
+				}.bind(this));
+
+		},
+
+		onAddCredential: function (oEvent) {
+
+			var sEnvironmentID = oEvent.getSource().getBindingContext().getObject().ID;
+
+			var oNewCredential = new JSONModel({
+				environment_ID: sEnvironmentID,
+				username: "",
+				password: ""
+			});
+
+			this.setModel(oNewCredential, "newCredential");
+
+			var oView = this.getView();
+
+			if (!this._oCredentialDialog) {
+				Fragment.load({ id: this.getView().getId(), name: "vinibar.Keeper_UI.view.Credential", controller: this })
+					.then(function (oFragment) {
+						oView.addDependent(oFragment);
+						this._oCredentialDialog = oFragment;
+						oFragment.open();
+					}.bind(this));
+			} else {
+				this._oCredentialDialog.open();
+			}
 
 		},
 
 		/* =========================================================== */
 		/* internal methods                                            */
 		/* =========================================================== */
+
+		_scrollToEnvironment: function (sEnvironmentID) {
+
+			// Navigate to Section and SubSection Title:
+			var oObjectPageLayout = this.byId("ObjectPageLayout");
+			var oNavSection;
+			var oNavSubSection;
+
+			oObjectPageLayout.getSections()
+				.forEach(oSection => {
+					oNavSection = oSection;
+					oSection.getSubSections()
+						.forEach(oSubSection => {
+							if (oSubSection.getBindingContext().getObject().ID == sEnvironmentID) {
+								oNavSubSection = oSubSection
+							}
+						});
+				});
+			oObjectPageLayout.scrollToSection(oNavSubSection.getId());
+
+		},
 
 		/**
 		 * Binds the view to the object path.
@@ -130,6 +212,7 @@ sap.ui.define([
 			var sObjectId = oEvent.getParameter("arguments").objectId;
 			this.getModel().metadataLoaded().then(function () {
 
+				this._oCustomer = new Customer(sObjectId, this.getModel());
 
 				if (sObjectId === "new") {
 					var oContext = this.getModel().createEntry("Customers", {

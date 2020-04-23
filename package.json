@@ -13,5 +13,6 @@
     "dependencies": [
       "ui5-middleware-simpleproxy"
     ]
-  }
+  },
+  "dependencies": {}
 }

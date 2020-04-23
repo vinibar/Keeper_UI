@@ -20,7 +20,78 @@ sap.ui.define([
 				await this._linkToEnvironmentType(oEnvironment.environment_type_ID);
 			}
 
-			return this._createEnvironment(oEnvironment);
+			var oEnvironment = await this._createEnvironment(oEnvironment);
+			return this.getEnvironment(oEnvironment.ID);
+		},
+
+		getEnvironment: async function (sEnvironmentID) {
+
+			var sEnvironmentPath = this.getModel().createKey("/Environments", { ID: sEnvironmentID });
+
+			return new Promise(function (resolve, reject) {
+				this.getModel().read(sEnvironmentPath, {
+					success: function (oData) {
+						resolve(oData);
+					},
+					error: function (oError) {
+						reject(oError);
+					},
+					urlParameters: {
+						"$expand": "customer2environment_type/environment_type"
+					}
+				})
+			}.bind(this));
+
+		},
+
+		deleteEnvironment: async function (oEnvironment) {
+
+			var sEnvironmentPath = this.getModel().createKey("/Environments", { ID: oEnvironment.ID });
+
+			for (let oCredential in oEnvironment.auths) {
+				if (oCredential.hasOwnProperty("ID")) {
+					await this.deleteCredential(oCredential);
+				}
+			}
+
+			return new Promise(function (resolve, reject) {
+				this.getModel().remove(sEnvironmentPath, {
+					success: resolve(true),
+					error: reject(),
+					refreshAfterChange: false
+				})
+			}.bind(this));
+
+		},
+
+		createCredential: async function (oNewCredential) {
+
+			return new Promise(function (resolve, reject) {
+				this.getModel().create("/Auths", oNewCredential, {
+					success: (oData) => {
+						debugger;
+						resolve(oData);
+					},
+					error: (oError) => {
+						debugger;
+						reject(oError);
+					}
+				});
+			}.bind(this));
+
+		},
+
+
+		deleteCredential: function (oCredential) {
+
+			var sCredentialPath = this.getModel().createKey("/Auths", { ID: oCredential.ID });
+
+			return new Promise(function (resolve) {
+				this.getModel().read(sCredentialPath, {
+					success: resolve(true),
+					error: resolve(false)
+				});
+			}.bind(this));
 
 		},
 
