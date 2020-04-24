@@ -7,7 +7,8 @@ sap.ui.define([
 	"sap/ui/core/Fragment",
 	"vinibar/Keeper_UI/model/Customer",
 	"sap/uxap/ObjectPageLayout",
-	"sap/m/MessageToast"
+	"sap/m/MessageToast",
+	"sap/m/MessageBox"
 ], function (BaseController,
 	JSONModel,
 	History,
@@ -16,7 +17,8 @@ sap.ui.define([
 	Fragment,
 	Customer,
 	ObjectPageLayout,
-	MessageToast) {
+	MessageToast,
+	MessageBox) {
 	"use strict";
 
 	return BaseController.extend("vinibar.Keeper_UI.controller.Object", {
@@ -76,12 +78,12 @@ sap.ui.define([
 
 		onAddEnvironment: function (oEvent) {
 
-			var oNewEnvironment = new JSONModel({
+			var oEnvironment = new JSONModel({
 				environment_type_ID: "",
 				title: ""
 			});
 
-			this.setModel(oNewEnvironment, "newEnvironment");
+			this.setModel(oEnvironment, "environment");
 
 			var oView = this.getView();
 
@@ -98,6 +100,30 @@ sap.ui.define([
 
 		},
 
+		onToggetEditEnvironment: function (oEvent) {
+
+			var sEnvironmentID = oEvent.getSource().getBindingContext().getObject().ID;
+			var sEnvironmentPath = this.getModel().createKey("Environments", { ID: sEnvironmentID });
+			var oPendingEnvironment = this.getModel().getPendingChanges()[sEnvironmentPath];
+			sEnvironmentPath = "/" + sEnvironmentPath;
+
+			if (oPendingEnvironment) {
+				MessageBox.warning("All your changes will be lost.", {
+					actions: [MessageBox.Action.OK, MessageBox.Action.CLOSE],
+					onClose: function (sAction) {
+
+						if (sAction === MessageBox.Action.OK) {
+							this.getModel().resetChanges([sEnvironmentPath]);
+						}
+						this._toggleEditEnvironment(sEnvironmentID);
+					}.bind(this)
+				});
+			} else {
+				this._toggleEditEnvironment(sEnvironmentID);
+			}
+
+		},
+
 		onDeleteEnvironment: function (oEvent) {
 
 			this.getModel("objectView").setProperty("/busy", true);
@@ -107,12 +133,26 @@ sap.ui.define([
 
 			this._oCustomer.deleteEnvironment(oEnvironment)
 				.then(function (bDeleted) {
-					debugger;
 					this._oCurrentSection.removeSubSection(this._oCurrentSubSection.getId());
 					delete this._oCurrentSection;
 					delete this._oCurrentSubSection;
 					this.getModel("objectView").setProperty("/busy", false);
-					MessageToast.show("SubSection successfully deleted");
+					MessageToast.show("The environment has been successfully deleted");
+				}.bind(this));
+
+		},
+
+		onSaveEnvironment: function (oEvent) {
+
+			this.getModel("objectView").setProperty("/busy", true);
+			var oSubSection = oEvent.getSource().getParent();
+			var oEnvironment = oSubSection.getBindingContext().getObject();
+
+			this._oCustomer.updateEnvironment(oEnvironment)
+				.then(function (oData) {
+					this._toggleEditEnvironment(oData.ID);
+					MessageToast.show("The environment has been successfully updated");
+					this.getModel("objectView").setProperty("/busy", false);
 				}.bind(this));
 
 		},
@@ -120,13 +160,13 @@ sap.ui.define([
 		onSaveNewEnvironment: function (oEvent) {
 
 			this.getModel("objectView").setProperty("/busy", true);
-			var oNewEnvironment = this.getModel("newEnvironment").getData();
+			var oEnvironment = this.getModel("environment").getData();
 			var oView = this.getView();
 			var sCustomerID = oView.getBindingContext().getObject().ID;
 
 			this._oCustomer.createEnvironment({
-				environment_type_ID: oNewEnvironment.environment_type_ID,
-				title: oNewEnvironment.title
+				environment_type_ID: oEnvironment.environment_type_ID,
+				title: oEnvironment.title
 			}).then(function (oData) {
 				this._oEnvironmentDialog.close();
 				setTimeout(function () { // need to wait for the scrollEnablement to be active
@@ -137,30 +177,17 @@ sap.ui.define([
 			}.bind(this))
 		},
 
-		onSaveNewCredential: function (oEvent) {
-
-			this.getModel("objectView").setProperty("/busy", true);
-			var oNewCredential = this.getModel("newCredential").getData();
-			debugger;
-			this._oCustomer.createCredential(oNewCredential)
-				.then(function (oData) {
-					this._oCredentialDialog.close();
-					this.getModel("objectView").setProperty("/busy", false);
-				}.bind(this));
-
-		},
-
 		onAddCredential: function (oEvent) {
 
 			var sEnvironmentID = oEvent.getSource().getBindingContext().getObject().ID;
 
-			var oNewCredential = new JSONModel({
+			var oCredential = new JSONModel({
 				environment_ID: sEnvironmentID,
 				username: "",
 				password: ""
 			});
 
-			this.setModel(oNewCredential, "newCredential");
+			this.setModel(oCredential, "credential");
 
 			var oView = this.getView();
 
@@ -177,9 +204,72 @@ sap.ui.define([
 
 		},
 
+		onDeleteCredential: function (oEvent) {
+
+			this.getModel("objectView").setProperty("/busy", true);
+			var oCredential = oEvent.getParameter("listItem").getBindingContext().getObject();
+
+			this._oCustomer.deleteCredential(oCredential).then(function () {
+				this.getModel("objectView").setProperty("/busy", false);
+				MessageToast.show("The credential has been successfully deleted.")
+			}.bind(this));
+
+		},
+
+		onEditCredential: function (oEvent) {
+
+			var oCredential = new JSONModel(oEvent.getSource().getBindingContext().getObject());
+			this.setModel(oCredential, "credential");
+
+			var oView = this.getView();
+			if (!this._oCredentialDialog) {
+				Fragment.load({ id: this.getView().getId(), name: "vinibar.Keeper_UI.view.Credential", controller: this })
+					.then(function (oFragment) {
+						oView.addDependent(oFragment);
+						this._oCredentialDialog = oFragment;
+						oFragment.open();
+					}.bind(this));
+			} else {
+				this._oCredentialDialog.open();
+			}
+
+		},
+
+		onSaveCredential: function (oEvent) {
+
+			this.getModel("objectView").setProperty("/busy", true);
+			var oCredential = this.getModel("credential").getData();
+
+			if (oCredential.hasOwnProperty("ID")) {
+				this._oCustomer.updateCredential(oCredential)
+					.then(function () {
+						this._oCredentialDialog.close();
+						this.getModel("objectView").setProperty("/busy", false);
+					}.bind(this));
+			} else {
+				this._oCustomer.createCredential(oCredential)
+					.then(function (oData) {
+						this._oCredentialDialog.close();
+						this.getModel("objectView").setProperty("/busy", false);
+					}.bind(this));
+			}
+
+		},
+
 		/* =========================================================== */
 		/* internal methods                                            */
 		/* =========================================================== */
+
+		_toggleEditEnvironment: function (sEnvironmentID) {
+
+			var aControls = this.getView().getControlsByFieldGroupId(sEnvironmentID);
+			var bEditable = aControls[0].getEditable();
+
+			aControls.forEach(function (oControl) {
+				oControl.setEditable(!bEditable);
+			});
+
+		},
 
 		_scrollToEnvironment: function (sEnvironmentID) {
 
@@ -214,19 +304,19 @@ sap.ui.define([
 
 				this._oCustomer = new Customer(sObjectId, this.getModel());
 
-				if (sObjectId === "new") {
-					var oContext = this.getModel().createEntry("Customers", {
-						properties: {
-							name: "New Customer"
-						}
-					});
-					oContext.getObject().name = "New Customer";
-					var sObjectPath = oContext.getPath();
-				} else {
-					var sObjectPath = this.getModel().createKey("/Customers", {
-						ID: sObjectId
-					});
-				}
+				// if (sObjectId === "new") {
+				// 	var oContext = this.getModel().createEntry("Customers", {
+				// 		properties: {
+				// 			name: "New Customer"
+				// 		}
+				// 	});
+				// 	oContext.getObject().name = "New Customer";
+				// 	var sObjectPath = oContext.getPath();
+				// } else {
+				var sObjectPath = this.getModel().createKey("/Customers", {
+					ID: sObjectId
+				});
+				// }
 
 				this._bindView(sObjectPath);
 			}.bind(this));

@@ -18,8 +18,6 @@
 
 				<actions>
 					<m:Button icon="sap-icon://add" text="Add Environment" type="Emphasized" tooltip="Add Environment" press=".onAddEnvironment" />
-					<m:Button text="Edit" type="Emphasized" />
-					<m:Button text="Cancel" />
 				</actions>
 			</ObjectPageDynamicHeaderTitle>
 		</headerTitle>
@@ -29,34 +27,40 @@
 				<subSections>
 					<ObjectPageSubSection title="{title}">
 						<actions>
+							<m:Button text="Edit" type="Emphasized" press=".onToggetEditEnvironment" icon="sap-icon://edit" />
+							<m:Button text="Save" type="Emphasized" press=".onSaveEnvironment" icon="sap-icon://save" />
 							<m:Button text="Delete" type="Transparent" press=".onDeleteEnvironment" icon="sap-icon://delete" />
 						</actions>
 						<blocks>
 							<m:VBox>
 								<forms:SimpleForm editable="false" layout="ColumnLayout">
+									<m:Label labelFor="iTitle" text="Title" />
+									<m:Input id="iTitle" value="{title}" visible="true" fieldGroupIds="{ID}" />
+								</forms:SimpleForm>
+								<forms:SimpleForm editable="false" layout="ColumnLayout">
 									<core:Title text="Entradas" />
 									<m:Label labelFor="iAdditionalField1" text="Additional Field 1" />
-									<m:Input id="iAdditionalField1" value="Additional Field 1" editable="true" />
+									<m:Input id="iAdditionalField1" value="Additional Field 1" fieldGroupIds="{ID}" />
 									<m:Label labelFor="iAdditionalField2" text="Additional Field 2" />
-									<m:Input id="iAdditionalField2" value="Additional Field 2" editable="true" />
+									<m:Input id="iAdditionalField2" value="Additional Field 2" fieldGroupIds="{ID}" />
 									<m:Label labelFor="iAdditionalField3" text="Additional Field 3" />
-									<m:Input id="iAdditionalField3" value="Additional Field 3" editable="true" />
+									<m:Input id="iAdditionalField3" value="Additional Field 3" fieldGroupIds="{ID}" />
 									<m:Label labelFor="iAdditionalField4" text="Additional Field 4" />
-									<m:Input id="iAdditionalField4" value="Additional Field 4" editable="true" />
+									<m:Input id="iAdditionalField4" value="Additional Field 4" fieldGroupIds="{ID}" />
 									<m:Label labelFor="iAdditionalField5" text="Additional Field 5" />
-									<m:Input id="iAdditionalField5" value="Additional Field 5" editable="true" />
+									<m:Input id="iAdditionalField5" value="Additional Field 5" fieldGroupIds="{ID}" />
 								</forms:SimpleForm>
 								<m:Panel>
 									<m:headerToolbar>
 										<m:Toolbar height="3rem">
 											<m:Title text="Senhas" />
 											<m:ToolbarSpacer />
-											<m:Button icon="sap-icon://add" text="Add new" type="Transparent" press=".onAddCredential"/>
+											<m:Button icon="sap-icon://add" text="Add new" type="Transparent" press=".onAddCredential" />
 										</m:Toolbar>
 									</m:headerToolbar>
 									<m:content>
 										<f:GridList id="gridList" items="{path: 'auths', templateShareable: true}" growing="true" growingThreshold="4" delete=".onDeleteCredential" mode="Delete">
-											<f:GridListItem type="DetailAndActive" highlight="Success" press=".onCopyCredential">
+											<f:GridListItem type="DetailAndActive" highlight="Success" press=".onCopyCredential" detailPress=".onEditCredential">
 												<m:VBox>
 													<m:VBox class="sapUiSmallMargin">
 														<m:Label labelFor="iAdditionalData" text="Additional Data" />

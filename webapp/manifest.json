@@ -72,7 +72,7 @@
 				"dataSource": "mainService",
 				"preload": true,
 				"settings": {
-					"defaultBindingMode": "OneWay"
+					"defaultBindingMode": "TwoWay"
 				}
 			}
 		},

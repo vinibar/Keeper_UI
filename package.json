@@ -7,6 +7,7 @@
   },
   "devDependencies": {
     "@ui5/cli": "^1.13.1",
+    "eslint": "^6.8.0",
     "ui5-middleware-simpleproxy": "^0.1.4"
   },
   "ui5": {

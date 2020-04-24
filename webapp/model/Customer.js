@@ -64,16 +64,43 @@ sap.ui.define([
 
 		},
 
+		updateEnvironment: function (oEnvironment) {
+
+			var sEnvironmentPath = this.getModel().createKey("/Environments", { ID: oEnvironment.ID });
+			return new Promise(function (resolve, reject) {
+				this.getModel().update(sEnvironmentPath, oEnvironment, {
+					success: resolve(oEnvironment),
+					error: reject()
+				})
+			}.bind(this));
+
+		},
+
 		createCredential: async function (oNewCredential) {
 
 			return new Promise(function (resolve, reject) {
 				this.getModel().create("/Auths", oNewCredential, {
 					success: (oData) => {
-						debugger;
 						resolve(oData);
 					},
 					error: (oError) => {
-						debugger;
+						reject(oError);
+					}
+				});
+			}.bind(this));
+
+		},
+
+		updateCredential: function (oCredential) {
+
+			var sCredentialPath = this.getModel().createKey("/Auths", { ID: oCredential.ID });
+
+			return new Promise(function (resolve, reject) {
+				this.getModel().update(sCredentialPath, oCredential, {
+					success: function (oData) {
+						resolve(true);
+					},
+					error: function (oError) {
 						reject(oError);
 					}
 				});
@@ -86,10 +113,14 @@ sap.ui.define([
 
 			var sCredentialPath = this.getModel().createKey("/Auths", { ID: oCredential.ID });
 
-			return new Promise(function (resolve) {
-				this.getModel().read(sCredentialPath, {
-					success: resolve(true),
-					error: resolve(false)
+			return new Promise(function (resolve, reject) {
+				this.getModel().remove(sCredentialPath, {
+					success: function (oData) {
+						resolve(true);
+					},
+					error: function (oError) {
+						reject(oError);
+					}
 				});
 			}.bind(this));
 

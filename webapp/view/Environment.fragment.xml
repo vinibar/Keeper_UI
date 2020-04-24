@@ -4,13 +4,13 @@
             <f:SimpleForm>
                 <f:content>
                     <Label text="Environment Type" />
-                    <Select items="{/EnvironmentTypes}" selectedKey="{newEnvironment>/environment_type_ID}" forceSelection="false">
+                    <Select items="{/EnvironmentTypes}" selectedKey="{environment>/environment_type_ID}" forceSelection="false">
                         <items>
                             <core:Item text="{title}" key="{ID}" />
                         </items>
                     </Select>
                     <Label text="Title"/>
-                    <Input value="{newEnvironment>/title}"/>
+                    <Input value="{environment>/title}"/>
                 </f:content>
             </f:SimpleForm>
         </content>
