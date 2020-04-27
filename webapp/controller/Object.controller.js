@@ -76,6 +76,41 @@ sap.ui.define([
 			}
 		},
 
+		onEditCustomer: function (oEvent) {
+
+			var oCustomer = new JSONModel(oEvent.getSource().getBindingContext().getObject());
+
+			this.setModel(oCustomer, "customer");
+
+			var oView = this.getView();
+
+			if (!this._oCustomerDialog) {
+				Fragment.load({ id: this.getView().getId(), name: "vinibar.Keeper_UI.view.Customer", controller: this })
+					.then(function (oFragment) {
+						oView.addDependent(oFragment);
+						this._oCustomerDialog = oFragment;
+						oFragment.open();
+					}.bind(this));
+			} else {
+				this._oCustomerDialog.open();
+			}
+
+		},
+
+		onSaveCustomer: function (oEvent) {
+
+			this.getModel("objectView").setProperty("/busy", true);
+			var oCustomer = this.getModel("customer").getData();
+
+			this._oCustomer.updateCustomer(oCustomer)
+				.then(function (oData) {
+					MessageToast.show("The customer has been successfully updated");
+					this.getModel("objectView").setProperty("/busy", false);
+					this._oCustomerDialog.close();
+				}.bind(this));
+
+		},
+
 		onAddEnvironment: function (oEvent) {
 
 			var oEnvironment = new JSONModel({

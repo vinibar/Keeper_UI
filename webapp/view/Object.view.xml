@@ -7,7 +7,7 @@
 				<heading>
 					<m:HBox>
 						<m:Title text="{name}" />
-						<m:Link text="edit" />
+						<m:Link text="edit" press=".onEditCustomer" />
 					</m:HBox>
 
 				</heading>
@@ -23,7 +23,7 @@
 		</headerTitle>
 
 		<sections>
-			<ObjectPageSection title="{environment_type/title}" subSections="{path: 'environments', templateShareable:true}">
+			<ObjectPageSection title="{environment_type/title}" subSections="{path: 'environments', parameters: { expand: 'auths' }, templateShareable:true}">
 				<subSections>
 					<ObjectPageSubSection title="{title}">
 						<actions>
