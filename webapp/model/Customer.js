@@ -208,6 +208,10 @@ sap.ui.define([
 
 		updateEnvironment: function (oEnvironment) {
 
+			if (!Array.isArray(oEnvironment.auths)) {
+				delete oEnvironment.auths;
+			}
+
 			var sEnvironmentPath = this.getModel().createKey("/Environments", { ID: oEnvironment.ID });
 			return new Promise(function (resolve, reject) {
 				this.getModel().update(sEnvironmentPath, oEnvironment, {

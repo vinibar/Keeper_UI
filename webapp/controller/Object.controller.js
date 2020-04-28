@@ -298,11 +298,11 @@ sap.ui.define([
 		_toggleEditEnvironment: function (sEnvironmentID) {
 
 			var aControls = this.getView().getControlsByFieldGroupId(sEnvironmentID);
-			var bEditable = aControls[0].getEditable();
+			var aVisibility = aControls.filter(oControl => oControl instanceof sap.m.Button || oControl.getId().includes("iTitle"));
+			var aEditablity = aControls.filter(oControl => aVisibility.indexOf(oControl) < 0 || oControl.getId().includes("iTitle"));
 
-			aControls.forEach(function (oControl) {
-				oControl.setEditable(!bEditable);
-			});
+			aVisibility.forEach(oControl => { oControl.setVisible(!oControl.getVisible()) });
+			aEditablity.forEach(oControl => { oControl.setEditable(!oControl.getEditable()) });
 
 		},
 

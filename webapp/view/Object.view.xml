@@ -27,35 +27,36 @@
 				<subSections>
 					<ObjectPageSubSection title="{title}">
 						<actions>
-							<m:Button text="Edit" type="Emphasized" press=".onToggetEditEnvironment" icon="sap-icon://edit" />
-							<m:Button text="Save" type="Emphasized" press=".onSaveEnvironment" icon="sap-icon://save" />
-							<m:Button text="Delete" type="Transparent" press=".onDeleteEnvironment" icon="sap-icon://delete" />
+							<m:Button text="Save" type="Emphasized" press=".onSaveEnvironment" icon="sap-icon://save" visible="false" fieldGroupIds="{ID}" />
+							<m:Button text="Delete" type="Transparent" press=".onDeleteEnvironment" icon="sap-icon://delete" visible="false" fieldGroupIds="{ID}" />
+							<m:Button text="Edit" type="Emphasized" press=".onToggetEditEnvironment" icon="sap-icon://edit" visible="true" fieldGroupIds="{ID}"/>
+							<m:Button text="Cancel" type="Default" press=".onToggetEditEnvironment" icon="sap-icon://cancel" visible="false" fieldGroupIds="{ID}"/>
 						</actions>
 						<blocks>
 							<m:VBox>
 								<forms:SimpleForm editable="false" layout="ColumnLayout">
 									<m:Label labelFor="iTitle" text="Title" />
-									<m:Input id="iTitle" value="{title}" visible="true" fieldGroupIds="{ID}" />
+									<m:Input id="iTitle" value="{title}" editable="false" visible="false" fieldGroupIds="{ID}"/>
 								</forms:SimpleForm>
 								<forms:SimpleForm editable="false" layout="ColumnLayout">
 									<core:Title text="Entradas" />
 									<m:Label labelFor="iAdditionalField1" text="Additional Field 1" />
-									<m:Input id="iAdditionalField1" value="Additional Field 1" fieldGroupIds="{ID}" />
+									<m:Input id="iAdditionalField1" value="Additional Field 1" fieldGroupIds="{ID}" editable="false" />
 									<m:Label labelFor="iAdditionalField2" text="Additional Field 2" />
-									<m:Input id="iAdditionalField2" value="Additional Field 2" fieldGroupIds="{ID}" />
+									<m:Input id="iAdditionalField2" value="Additional Field 2" fieldGroupIds="{ID}" editable="false" />
 									<m:Label labelFor="iAdditionalField3" text="Additional Field 3" />
-									<m:Input id="iAdditionalField3" value="Additional Field 3" fieldGroupIds="{ID}" />
+									<m:Input id="iAdditionalField3" value="Additional Field 3" fieldGroupIds="{ID}" editable="false" />
 									<m:Label labelFor="iAdditionalField4" text="Additional Field 4" />
-									<m:Input id="iAdditionalField4" value="Additional Field 4" fieldGroupIds="{ID}" />
+									<m:Input id="iAdditionalField4" value="Additional Field 4" fieldGroupIds="{ID}" editable="false" />
 									<m:Label labelFor="iAdditionalField5" text="Additional Field 5" />
-									<m:Input id="iAdditionalField5" value="Additional Field 5" fieldGroupIds="{ID}" />
+									<m:Input id="iAdditionalField5" value="Additional Field 5" fieldGroupIds="{ID}" editable="false" />
 								</forms:SimpleForm>
 								<m:Panel>
 									<m:headerToolbar>
 										<m:Toolbar height="3rem">
 											<m:Title text="Senhas" />
 											<m:ToolbarSpacer />
-											<m:Button icon="sap-icon://add" text="Add new" type="Transparent" press=".onAddCredential" />
+											<m:Button icon="sap-icon://add" text="Add new" type="Transparent" press=".onAddCredential" visible="true"/>
 										</m:Toolbar>
 									</m:headerToolbar>
 									<m:content>
